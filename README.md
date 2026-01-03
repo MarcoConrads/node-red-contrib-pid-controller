@@ -1,2 +1,2 @@
-# node-red-contrib-pid-controller
+# node-red-contrib-pid-controller-autotuning
 

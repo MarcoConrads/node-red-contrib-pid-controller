@@ -247,6 +247,7 @@ module.exports = function (RED) {
 
                 msg.payload = output;
                 msg.pid = {
+                    out: output,
                     pv: lastPV,
                     setpoint: lastSP,
                     error,

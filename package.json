@@ -1,7 +1,7 @@
 {
-  "name": "node-red-contrib-pid-controller",
+  "name": "node-red-contrib-pid-controller-autotuning",
   "version": "1.0.1",
-  "description": "Eenvoudige PID regelaar voor Node-RED",
+  "description": "PID controller for Node-RED with auto tuning",
   "keywords": [
     "node-red",
     "pid",

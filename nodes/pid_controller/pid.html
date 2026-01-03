@@ -5,16 +5,16 @@
         defaults: {
             name:      { value: "" },
 
-            // Basis PID-parameters (startwaarden)
+            // Basic PID parameters (initial values)
             kp:        { value: 1.0,   required: true },
-            Ti:        { value: 900.0, required: true },  // bijv. 15 min
+            Ti:        { value: 0.0, required: true },  // e.g. 15 min
             Td:        { value: 0.0,   required: true },
 
             outMin:    { value: 0.0,   required: true },
             outMax:    { value: 100.0, required: true },
             direction: { value: "direct" },
 
-            // Zelflerend – geschikt voor trage temperatuurregeling
+            // Self-learning – suitable for slow temperature control
             autoTune:   { value: true },
             learnRateP: { value: 0.02 },
             learnRateI: { value: 0.02 },
@@ -42,24 +42,24 @@
 <script type="text/x-red" data-template-name="pid-controller">
 
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Naam</label>
-        <input type="text" id="node-input-name" placeholder="bijv. Kamer PID">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="e.g. Room PID">
     </div>
 
     <hr/>
 
     <div class="form-row">
-        <label for="node-input-kp">Kp (start)</label>
+        <label for="node-input-kp">Kp (initial)</label>
         <input type="number" step="0.01" id="node-input-kp">
     </div>
 
     <div class="form-row">
-        <label for="node-input-Ti">Ti (s, start)</label>
+        <label for="node-input-Ti">Ti (s, initial)</label>
         <input type="number" step="1" id="node-input-Ti">
     </div>
 
     <div class="form-row">
-        <label for="node-input-Td">Td (s, start)</label>
+        <label for="node-input-Td">Td (s, initial)</label>
         <input type="number" step="1" id="node-input-Td">
     </div>
 
@@ -74,7 +74,7 @@
     </div>
 
     <div class="form-row">
-        <label for="node-input-direction">Richting</label>
+        <label for="node-input-direction">Direction</label>
         <select id="node-input-direction">
             <option value="direct">Direct (PV↑ → output↑)</option>
             <option value="reverse">Reverse (PV↑ → output↓)</option>
@@ -84,9 +84,9 @@
     <hr/>
 
     <div class="form-row">
-        <label for="node-input-autoTune">Zelflerend</label>
+        <label for="node-input-autoTune">Self-learning</label>
         <input type="checkbox" id="node-input-autoTune" style="margin-top: 5px;">
-        <span style="margin-left: 5px;">Auto-tune voor trage temperatuurregeling</span>
+        <span style="margin-left: 5px;">Auto-tuning for slow temperature control</span>
     </div>
 
     <div class="form-row">
@@ -106,70 +106,71 @@
 
     <div class="form-row">
         <label for="node-input-kpMin">Kp min / max</label>
-        <input type="number" step="0.01" id="node-input-kpMin" style="width: 45%;">
-        <input type="number" step="0.01" id="node-input-kpMax" style="width: 45%; float: right;">
+        <input type="number" step="0.01" id="node-input-kpMin" style="width: 35%;">
+        <input type="number" step="0.01" id="node-input-kpMax" style="width: 35%; float: right;">
     </div>
 
     <div class="form-row">
         <label for="node-input-TiMin">Ti min / max (s)</label>
-        <input type="number" step="1" id="node-input-TiMin" style="width: 45%;">
-        <input type="number" step="1" id="node-input-TiMax" style="width: 45%; float: right;">
+        <input type="number" step="1" id="node-input-TiMin" style="width: 35%;">
+        <input type="number" step="1" id="node-input-TiMax" style="width: 35%; float: right;">
     </div>
 
     <div class="form-row">
         <label for="node-input-TdMin">Td min / max (s)</label>
-        <input type="number" step="1" id="node-input-TdMin" style="width: 45%;">
-        <input type="number" step="1" id="node-input-TdMax" style="width: 45%; float: right;">
+        <input type="number" step="1" id="node-input-TdMin" style="width: 35%;">
+        <input type="number" step="1" id="node-input-TdMax" style="width: 35%; float: right;">
     </div>
 
 </script>
 
-<!-- Help-tekst in de editor -->
+<!-- Help text in the editor -->
 <script type="text/x-red" data-help-name="pid-controller">
     <p>
-        PID-regelaar voor Node-RED, ontworpen voor <b>trage temperatuurregelingen</b>
-        (bijv. kamer, vloerverwarming, boiler).
+        PID controller for Node-RED, designed for <b>slow temperature control</b>
+        (e.g. room heating, underfloor heating, boiler).
     </p>
 
     <p>
         <b>Input:</b><br/>
-        - <code>msg.payload</code>: proceswaarde (PV), bijv. gemeten temperatuur<br/>
-        - <code>msg.setpoint</code>: setpoint (SP), bijv. gewenste temperatuur<br/>
-        - <code>msg.reset</code> (optioneel):<br/>
-        &nbsp;&nbsp;• <code>true</code> of <code>"hard"</code> reset: reset intern geheugen én vergeet opgeslagen PID-parameters
+        - <code>msg.payload</code>: process value (PV), e.g. measured temperature<br/>
+        - <code>msg.setpoint</code>: setpoint (SP), e.g. desired temperature<br/>
+        - <code>msg.reset</code> (optional):<br/>
+        &nbsp;&nbsp;• <code>true</code> or <code>"hard"</code> reset: resets internal memory and forgets stored PID parameters
     </p>
 
     <p>
         <b>Output:</b><br/>
-        - <code>msg.payload</code>: regeloutput (CV), geschaald tussen <code>outMin</code> en <code>outMax</code><br/>
-        - <code>msg.pid</code>: extra info (PV, SP, fout, P/I/D-termen, Kp, Ti, Td, Ki, Kd, dt)
+        - <code>msg.payload</code>: control output (CV), scaled between <code>outMin</code> and <code>outMax</code><br/>
+        - <code>msg.pid</code>: additional info (PV, SP, error, P/I/D terms, Kp, Ti, Td, Ki, Kd, dt)
     </p>
 
-    <h4>Zelflerende modus</h4>
+    <h4>Self-learning mode</h4>
     <p>
-        Als <b>Zelflerend</b> is aangevinkt, bewaakt de node over een lange periode
-        (typisch ~20 minuten) de fout en oscillerend gedrag, en past dan
-        <code>Kp</code> en <code>Ti</code> in kleine stapjes aan:
+        When <b>Self-learning</b> is enabled, the node monitors the error and
+        oscillatory behavior over a long period
+        (typically ~20 minutes) and then adjusts
+        <code>Kp</code> and <code>Ti</code> in small steps:
     </p>
     <ul>
-        <li>Grote fout, weinig oscillatie → Kp iets omhoog, Ti iets korter</li>
-        <li>Veel oscillatie → Kp iets omlaag, Ti iets langer</li>
-        <li>Blijvende offset → Ti iets korter</li>
+        <li>Large error, little oscillation → slightly increase Kp, shorten Ti</li>
+        <li>Strong oscillation → slightly decrease Kp, lengthen Ti</li>
+        <li>Persistent offset → shorten Ti</li>
     </ul>
 
     <p>
-        De actuele waarden van Kp/Ti/Td worden opgeslagen in de Node-RED context
-        (via <code>node.context()</code>) zodat na een herstart wordt
-        verdergegaan met de laatste getunede waarden.<br/>
-        Zorg dat in <code>settings.js</code> <b>contextStorage</b> is
-        ingesteld met een <code>localfilesystem</code>-store als je dit
-        persistent op schijf wilt bewaren.
+        The current values of Kp/Ti/Td are stored in the Node-RED context
+        (via <code>node.context()</code>) so that after a restart
+        the controller continues with the last tuned values.<br/>
+        Make sure <b>contextStorage</b> is configured in <code>settings.js</code>
+        with a <code>localfilesystem</code> store if you want this
+        to be persisted to disk.
     </p>
 
-    <h4>Tip voor gebruik</h4>
+    <h4>Usage tips</h4>
     <ul>
-        <li>Gebruik een sample-interval van ca. 10–30 seconden.</li>
-        <li>Begin met conservatieve waarden (lage Kp, grote Ti) en laat de zelflerende modus uren draaien.</li>
-        <li>Monitor <code>msg.pid</code> met een debug node of dashboard grafiek.</li>
+        <li>Use a sample interval of approximately 10–30 seconds.</li>
+        <li>Start with conservative values (low Kp, large Ti) and let the self-learning mode run for several hours.</li>
+        <li>Monitor <code>msg.pid</code> using a debug node or a dashboard chart.</li>
     </ul>
 </script>
